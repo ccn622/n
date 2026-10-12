@@ -24,8 +24,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .divline::after{background:linear-gradient(to left,transparent,var(--line))}
 .divline-inner{font-size:9px;letter-spacing:.35em;color:var(--dim);white-space:nowrap}
 .grid{flex:1;display:grid;position:relative;z-index:1;grid-template-columns:1fr 1fr;}
-@media(min-width:768px){html,body{height:100%;overflow:hidden;}body{height:100vh;}.grid{grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr;}.col{border-right:none;border-bottom:none;}.col:not(:nth-child(4n)){box-shadow:inset -1px 0 0 rgba(79,195,247,0.10), inset -2px 0 0 rgba(255,255,255,0.04), inset -3px 0 0 rgba(0,0,0,0.25);}.col:nth-child(-n+4){box-shadow:inset 0 -1px 0 rgba(79,195,247,0.10), inset 0 -2px 0 rgba(255,255,255,0.04), inset 0 -3px 0 rgba(0,0,0,0.25);}.col:not(:nth-child(4n)):nth-child(-n+4){box-shadow:inset -1px 0 0 rgba(79,195,247,0.10), inset -2px 0 0 rgba(255,255,255,0.04), inset -3px 0 0 rgba(0,0,0,0.25), inset 0 -1px 0 rgba(79,195,247,0.10), inset 0 -2px 0 rgba(255,255,255,0.04), inset 0 -3px 0 rgba(0,0,0,0.25);}.chart-area{height:90px;flex-shrink:0;}}
-@media(max-width:767px){.grid{grid-template-columns:1fr 1fr;}.col{border-right:1px solid var(--line);border-bottom:1px solid var(--line);}.col:nth-child(2n){border-right:none;}.chart-area{height:120px;flex-shrink:0;}.brand-zh{font-size:16px;font-weight:900;letter-spacing:.04em;white-space:nowrap;}.brand-sub{font-size:8px;letter-spacing:.12em;}.price-cny{font-size:clamp(32px,8vw,52px)!important;}.metal-name{font-size:clamp(26px,7vw,40px)!important;}.topbar{padding:8px 36px 8px 6px;min-height:0;}.brand-center{position:static;transform:none;flex:1;text-align:center;white-space:normal;margin-right:20px;}}
+@media(min-width:768px){html,body{height:100%;overflow:hidden;}body{height:100vh;}.grid{grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr;}.col{border-right:none;border-bottom:none;}.col:not(:nth-child(4n)){box-shadow:inset -1px 0 0 rgba(79,195,247,0.10), inset -2px 0 0 rgba(255,255,255,0.04), inset -3px 0 0 rgba(0,0,0,0.25);}.col:nth-child(-n+4){box-shadow:inset 0 -1px 0 rgba(79,195,247,0.10), inset 0 -2px 0 rgba(255,255,255,0.04), inset 0 -3px 0 rgba(0,0,0,0.25);}.col:not(:nth-child(4n)):nth-child(-n+4){box-shadow:inset -1px 0 0 rgba(79,195,247,0.10), inset -2px 0 0 rgba(255,255,255,0.04), inset -3px 0 0 rgba(0,0,0,0.25), inset 0 -1px 0 rgba(79,195,247,0.10), inset 0 -2px 0 rgba(255,255,255,0.04), inset 0 -3px 0 rgba(0,0,0,0.25);}.grid{min-height:0;grid-template-rows:repeat(2,minmax(0,1fr));}.col{min-height:0;}.chart-area{flex:1 1 0;height:auto;min-height:60px;max-height:400px;}}
+@media(max-width:767px){.grid{grid-template-columns:1fr 1fr;}.col{border-right:1px solid var(--line);border-bottom:1px solid var(--line);}.col:nth-child(2n){border-right:none;}.chart-area{height:168px;flex-shrink:0;}.brand-zh{font-size:16px;font-weight:900;letter-spacing:.04em;white-space:nowrap;}.brand-sub{font-size:8px;letter-spacing:.12em;}.price-cny{font-size:clamp(32px,8vw,52px)!important;}.metal-name{font-size:clamp(26px,7vw,40px)!important;}.topbar{padding:8px 36px 8px 6px;min-height:0;}.brand-center{position:static;transform:none;flex:1;text-align:center;white-space:normal;margin-right:20px;}}
 .col{display:flex;flex-direction:column;align-items:center;padding:12px 16px 8px;position:relative;overflow:hidden;}
 .col::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(to right,transparent,rgba(79,195,247,0.4),transparent);opacity:0;transition:opacity .4s;}
 .col:hover::before{opacity:1}.metal-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.3em;color:var(--dim);margin-bottom:2px;text-transform:uppercase;}
@@ -97,6 +97,7 @@ canvas.chart{position:absolute;inset:0;width:100%;height:100%;}@keyframes fu{0%{
 .pp-reset:hover{color:var(--gold);border-color:var(--gold)}.pp-sync{font-size:10px;text-align:center;margin-top:8px;height:16px;letter-spacing:.1em;}
 .pp-sync.ok{color:#4DCB82}.pp-sync.err{color:#E05555}.pp-sync.ing{color:var(--gold3)}
 .pp-footer{margin-top:6px;font-size:10px;color:var(--dim);text-align:center;letter-spacing:.12em;}
+.price-unit,.chg{display:none!important;}
 </style></head><body>
 <div class="topbar">
   <div style="min-width:80px"></div>
@@ -105,14 +106,14 @@ canvas.chart{position:absolute;inset:0;width:100%;height:100%;}@keyframes fu{0%{
 </div>
 <div class="divline"><span class="divline-inner">REAL · TIME · MARKET · DATA</span></div>
 <div class="grid">
-  <div class="col" id="col-gold"><div class="metal-tag">XAU / CNY</div><div class="metal-name g">黄 金</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-gold">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-gold">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('gold','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('gold','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('gold','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('gold','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-gold"></canvas></div></div></div>
-  <div class="col" id="col-silver"><div class="metal-tag">XAG / CNY</div><div class="metal-name s">白 银</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-silver">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-silver">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('silver','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('silver','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('silver','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('silver','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-silver"></canvas></div></div></div>
-  <div class="col" id="col-platinum"><div class="metal-tag">XPT / CNY</div><div class="metal-name p">铂 金</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-platinum">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-platinum">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('platinum','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('platinum','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('platinum','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('platinum','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-platinum"></canvas></div></div></div>
-  <div class="col" id="col-palladium"><div class="metal-tag">XPD / CNY</div><div class="metal-name d">钯 金</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-palladium">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-palladium">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('palladium','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('palladium','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('palladium','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('palladium','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-palladium"></canvas></div></div></div>
-  <div class="col" id="col-au999"><div class="metal-tag">AU999</div><div class="metal-name a">Au999</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-au999">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-au999">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('au999','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('au999','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('au999','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('au999','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-au999"></canvas></div></div></div>
-  <div class="col" id="col-18k"><div class="metal-tag">18K GOLD</div><div class="metal-name k">18K</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-18k">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-18k">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('18k','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('18k','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('18k','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('18k','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-18k"></canvas></div></div></div>
-  <div class="col" id="col-pt950"><div class="metal-tag">PT950</div><div class="metal-name pt">Pt950</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-pt950">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-pt950">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('pt950','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('pt950','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('pt950','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('pt950','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-pt950"></canvas></div></div></div>
-  <div class="col" id="col-pd990"><div class="metal-tag">PD990</div><div class="metal-name pd">Pd990</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-pd990">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-pd990">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('pd990','m15',this)">15分</div><div class="chart-tab" onclick="switchTab('pd990','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('pd990','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('pd990','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-pd990"></canvas></div></div></div>
+  <div class="col" id="col-gold"><div class="metal-tag">XAU / CNY</div><div class="metal-name g">黄 金</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-gold">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-gold">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('gold','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('gold','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('gold','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('gold','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-gold"></canvas></div></div></div>
+  <div class="col" id="col-silver"><div class="metal-tag">XAG / CNY</div><div class="metal-name s">白 银</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-silver">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-silver">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('silver','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('silver','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('silver','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('silver','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-silver"></canvas></div></div></div>
+  <div class="col" id="col-platinum"><div class="metal-tag">XPT / CNY</div><div class="metal-name p">铂 金</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-platinum">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-platinum">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('platinum','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('platinum','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('platinum','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('platinum','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-platinum"></canvas></div></div></div>
+  <div class="col" id="col-palladium"><div class="metal-tag">XPD / CNY</div><div class="metal-name d">钯 金</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-palladium">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-palladium">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('palladium','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('palladium','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('palladium','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('palladium','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-palladium"></canvas></div></div></div>
+  <div class="col" id="col-au999"><div class="metal-tag">AU999</div><div class="metal-name a">Au999</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-au999">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-au999">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('au999','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('au999','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('au999','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('au999','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-au999"></canvas></div></div></div>
+  <div class="col" id="col-18k"><div class="metal-tag">18K GOLD</div><div class="metal-name k">18K</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-18k">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-18k">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('18k','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('18k','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('18k','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('18k','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-18k"></canvas></div></div></div>
+  <div class="col" id="col-pt950"><div class="metal-tag">PT950</div><div class="metal-name pt">Pt950</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-pt950">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-pt950">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('pt950','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('pt950','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('pt950','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('pt950','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-pt950"></canvas></div></div></div>
+  <div class="col" id="col-pd990"><div class="metal-tag">PD990</div><div class="metal-name pd">Pd990</div><div class="price-label">回收价（元/克）</div><div class="price-cny neu" id="p-pd990">———</div><div class="price-unit">CNY / GRAM</div><div class="chg neu" id="chg-pd990">— —</div><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchTab('pd990','m15',this)">3分</div><div class="chart-tab" onclick="switchTab('pd990','h1',this)">1时</div><div class="chart-tab" onclick="switchTab('pd990','d1',this)">1日</div><div class="chart-tab" onclick="switchTab('pd990','w1',this)">1周</div></div><div class="chart-wrap"><canvas class="chart" id="cv-pd990"></canvas></div></div></div>
 </div>
 <div class="bottombar">
   <div class="status-wrap"><div class="dot" id="dot" onclick="triggerStep1()"></div><span id="stxt">连接中</span><span class="lupd" id="lupd" onclick="triggerStep2()"></span></div>
@@ -291,7 +292,7 @@ var chartFetchAt={};
 var chartOffsets={};
 var chartTouchStart={};
 // 每个周期一屏都显示30根蜡烛，保证四个周期的蜡烛粗细一样
-function chartViewCount(tab){return tab==='m15'?60:30;}
+function chartViewCount(tab){return tab==='m15'?180:30;}
 function switchTab(key,tab,el){
   activeTab[key]=tab;
   chartOffsets[key+'_'+tab]=0;
@@ -366,7 +367,7 @@ function fetchHistory(key,force){
       drawChart(key);
     });
 }
-var LIVE_MS=15000,LIVE_MAX=1920,LIVE={};
+var LIVE_MS=1000,LIVE_MAX=7200,LIVE={};
 function getCandles(key,tab){return tab==='m15'?(LIVE[key]||(LIVE[key]=[])):(HIST[key][tab]||[]);}
 function pushLive(key){
   var base=lastPrice[key];
@@ -377,13 +378,19 @@ function pushLive(key){
     if(base<last.l)last.l=base;
     last.c=base;
   }else{
-    var o=last?last.c:base;
-    arr.push({b:b,t:now,o:o,h:Math.max(o,base),l:Math.min(o,base),c:base});
-    if(arr.length>LIVE_MAX)arr.shift();
+    var o=last?last.c:base,added=0;
+    if(last&&b-last.b>1){
+      var gap=Math.min(b-last.b-1,300);
+      for(var g=1;g<=gap;g++){arr.push({b:last.b+g,t:last.t+g*LIVE_MS,o:o,h:o,l:o,c:o});added++;}
+    }
+    arr.push({b:b,t:now,o:o,h:Math.max(o,base),l:Math.min(o,base),c:base});added++;
+    while(arr.length>LIVE_MAX)arr.shift();
     var k=key+'_m15',off=chartOffsets[k]||0;
-    if(off>0)chartOffsets[k]=Math.min(off+1,Math.max(0,arr.length-chartViewCount('m15')));
+    if(off>0)chartOffsets[k]=Math.min(off+added,Math.max(0,arr.length-chartViewCount('m15')));
   }
 }
+// 每秒记一个点并重画，不管价格几秒推一次，1分图都匀速走
+setInterval(function(){KEYS.forEach(function(k){if(lastPrice[k]){pushLive(k);if(activeTab[k]==='m15')drawChart(k);}});},1000);
 function pushChartPoint(key,cny){
   chartCounters[key]++;
   pushLive(key);
@@ -401,6 +408,8 @@ function drawChart(key){
   var end=Math.max(0,raw.length-offset);
   var start=Math.max(0,end-viewCount);
   var cs=raw.slice(start,end).map(function(p){return {o:p.o*scale+fix,h:p.h*scale+fix,l:p.l*scale+fix,c:p.c*scale+fix};});
+  var lineMode=live&&window.innerWidth>=768;
+  if(lineMode)cs=cs.map(function(c){return {o:c.c,h:c.c,l:c.c,c:c.c};});
   var wrap=canvas.parentNode,W=wrap.clientWidth,H=wrap.clientHeight;
   if(W<2||H<2)return;
   var dpr=window.devicePixelRatio||1;
@@ -427,8 +436,18 @@ function drawChart(key){
   var pad={l:4,r:boxW+4,t:4,b:4},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b;
   function yp(v){return pad.t+(1-(v-minV)/range)*gH;}
   var n=cs.length,slot=gW/Math.max(n,viewCount),bw=Math.max(1.4,Math.min(6,slot*0.62));
-  // 蜡烛
-  for(var i=0;i<n;i++){
+  if(lineMode){
+    var up0=cs[n-1].c>=cs[0].c,lc=up0?'#4DCB82':'#E05555';
+    ctx.save();
+    ctx.beginPath();
+    for(var j=0;j<n;j++){var lx0=pad.l+slot*(j+0.5),ly0=yp(cs[j].c);if(j===0)ctx.moveTo(lx0,ly0);else ctx.lineTo(lx0,ly0);}
+    ctx.strokeStyle=lc;ctx.lineWidth=1.2;ctx.lineJoin='round';ctx.stroke();
+    ctx.lineTo(pad.l+slot*(n-0.5),pad.t+gH);ctx.lineTo(pad.l+slot*0.5,pad.t+gH);ctx.closePath();
+    var gr=ctx.createLinearGradient(0,pad.t,0,pad.t+gH);
+    gr.addColorStop(0,up0?'rgba(77,203,130,0.22)':'rgba(224,85,85,0.22)');gr.addColorStop(1,'rgba(10,22,40,0)');
+    ctx.fillStyle=gr;ctx.fill();
+    ctx.restore();
+  }else for(var i=0;i<n;i++){
     var c=cs[i],up=c.c>=c.o,col=up?'#4DCB82':'#E05555';
     var x=pad.l+slot*(i+0.5);
     ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=slot<3?0.9:1.2;
