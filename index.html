@@ -291,7 +291,7 @@ var chartFetchAt={};
 var chartOffsets={};
 var chartTouchStart={};
 // 每个周期一屏都显示30根蜡烛，保证四个周期的蜡烛粗细一样
-function chartViewCount(tab){return 30;}
+function chartViewCount(tab){return tab==='m15'?60:30;}
 function switchTab(key,tab,el){
   activeTab[key]=tab;
   chartOffsets[key+'_'+tab]=0;
@@ -366,7 +366,7 @@ function fetchHistory(key,force){
       drawChart(key);
     });
 }
-var LIVE_MS=30000,LIVE_MAX=960,LIVE={};
+var LIVE_MS=15000,LIVE_MAX=1920,LIVE={};
 function getCandles(key,tab){return tab==='m15'?(LIVE[key]||(LIVE[key]=[])):(HIST[key][tab]||[]);}
 function pushLive(key){
   var base=lastPrice[key];
@@ -412,26 +412,63 @@ function drawChart(key){
     ctx.beginPath();ctx.moveTo(6,H*0.55);ctx.lineTo(W-6,H*0.55);ctx.stroke();
     return;
   }
-  var minV=Infinity,maxV=-Infinity;
-  cs.forEach(function(c){if(c.l<minV)minV=c.l;if(c.h>maxV)maxV=c.h;});
+  var minV=Infinity,maxV=-Infinity,hiI=0,loI=0;
+  cs.forEach(function(c,i){
+    if(c.l<minV){minV=c.l;loI=i;}
+    if(c.h>maxV){maxV=c.h;hiI=i;}
+  });
+  var hiV=maxV,loV=minV;
   var range=maxV-minV||Math.abs(maxV)*0.001||1;
-  minV-=range*0.1;maxV+=range*0.1;range=maxV-minV;
-  var pad={l:4,r:4,t:4,b:4},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b;
+  minV-=range*0.12;maxV+=range*0.12;range=maxV-minV;
+  var fs=W<260?8:9;
+  ctx.font=fs+'px "JetBrains Mono",monospace';
+  var lastV=cs[cs.length-1].c;
+  var boxW=Math.ceil(ctx.measureText(maxV.toFixed(2)).width)+8,boxH=fs+4;
+  var pad={l:4,r:boxW+4,t:4,b:4},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b;
   function yp(v){return pad.t+(1-(v-minV)/range)*gH;}
-  var n=cs.length,slot=gW/Math.max(n,viewCount),bw=Math.max(1.2,Math.min(6,slot*0.38));
-  // 最新价虚线（只在看最新数据时显示）
-  if(offset===0){
-    var ly=yp(cs[n-1].c);
-    ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(129,212,250,0.35)';ctx.lineWidth=0.7;
-    ctx.beginPath();ctx.moveTo(pad.l,ly);ctx.lineTo(W-pad.r,ly);ctx.stroke();ctx.restore();
-  }
+  var n=cs.length,slot=gW/Math.max(n,viewCount),bw=Math.max(1.4,Math.min(6,slot*0.62));
+  // 蜡烛
   for(var i=0;i<n;i++){
     var c=cs[i],up=c.c>=c.o,col=up?'#4DCB82':'#E05555';
     var x=pad.l+slot*(i+0.5);
-    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=0.8;
+    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=slot<3?0.9:1.2;
     ctx.beginPath();ctx.moveTo(x,yp(c.h));ctx.lineTo(x,yp(c.l));ctx.stroke();
     var yTop=yp(Math.max(c.o,c.c)),yBot=yp(Math.min(c.o,c.c)),bh=Math.max(1,yBot-yTop);
     ctx.fillRect(x-bw/2,yTop,bw,bh);
+  }
+  // 最高/最低价标注（带引线）
+  function mark(idx,v,isHigh){
+    var x=pad.l+slot*(idx+0.5),y=yp(v),txt=v.toFixed(2),tw=ctx.measureText(txt).width;
+    var toRight=(x+10+tw<=W-pad.r);
+    var x1=toRight?x+8:x-8,tx=toRight?x+10:x-10;
+    if(!toRight&&tx-tw<2)tx=tw+2;
+    ctx.save();
+    ctx.strokeStyle='rgba(227,242,253,0.7)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x1,y);ctx.stroke();
+    ctx.textAlign=toRight?'left':'right';ctx.textBaseline='middle';
+    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(10,22,40,0.9)';ctx.strokeText(txt,tx,y);
+    ctx.fillStyle='#E3F2FD';ctx.fillText(txt,tx,y);
+    ctx.restore();
+  }
+  if(hiV>loV){
+    mark(hiI,hiV,true);
+    mark(loI,loV,false);
+  }
+  // 当前价：虚线 + 右侧框（只在看最新数据时显示）
+  if(offset===0){
+    var ly=yp(lastV);
+    ctx.save();
+    ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(129,212,250,0.6)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(pad.l,ly);ctx.lineTo(W-boxW-1,ly);ctx.stroke();
+    ctx.setLineDash([]);
+    var bx=W-boxW-1,by=Math.max(1,Math.min(H-boxH-1,ly-boxH/2));
+    ctx.fillStyle='#0A1628';ctx.strokeStyle='rgba(129,212,250,0.8)';ctx.lineWidth=0.9;
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(bx,by,boxW,boxH,3);else ctx.rect(bx,by,boxW,boxH);
+    ctx.fill();ctx.stroke();
+    ctx.fillStyle='#E3F2FD';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lastV.toFixed(2),bx+boxW/2,by+boxH/2+0.5);
+    ctx.restore();
   }
 }
 function panChart(key,deltaX){
