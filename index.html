@@ -141,7 +141,176 @@ canvas.chart{position:absolute;inset:0;width:100%;height:100%;}@keyframes fu{0%{
     <div style="text-align:center;margin-top:10px;"><button onclick="saveToFirebase()" style="background:linear-gradient(135deg,#0277BD,#4FC3F7);border:none;color:#0A1628;padding:8px 32px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.1em;font-family:'Noto Serif SC',serif;">保存并同步所有人</button></div>
   </div>
 </div><script>
-var WS_URL='wss://ws.wwog.qzz.io';
+var WS_URL='ws://rtjqtgw.ytj9999.com:7443/gateway';
+(function(){
+  // 融通金原生 WebSocket 协议 (AUTH→HELLO→HB→订阅)
+  var AUTH_B64='CCAQ+g8iQSo/CgNydGoSOD3V+ThTvIWQGkvTKzmQB+8R4Z7qPLWPIWY3fShEZvPpPcDh9oGcRd0HroBsEPJzZsppk5LexK9N';
+  var HELLO_B64='CBwQ3A8iBQoDUlRK';
+  var HB_B64='CBAQvAM=';
+  var SYMS=['JZJ_au_PB','JZJ_ag_PB','JZJ_pt_PB','JZJ_pd_PB','JZJ_au_PS','JZJ_ag_PS','JZJ_pt_PS','JZJ_pd_PS'];
+  function b64dec(s){
+    var bin=atob(s),a=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);
+    return a.buffer;
+  }
+  function vint(n){
+    var o=[];
+    while(n>127){o.push((n&127)|128);n=Math.floor(n/128);}
+    o.push(n);return new Uint8Array(o);
+  }
+  function subFrame(sym,seq){
+    var s=new TextEncoder().encode(sym);
+    var inner=new Uint8Array(2+s.length+3);
+    inner[0]=0x0a;inner[1]=s.length;inner.set(s,2);
+    inner[2+s.length]=0x12;inner[3+s.length]=0x01;inner[4+s.length]=0x00;
+    var head=new Uint8Array([0x08,0x12,0x10]);
+    var vs=vint(seq);
+    var out=new Uint8Array(head.length+vs.length+2+inner.length);
+    var p=0;
+    out.set(head,p);p+=head.length;
+    out.set(vs,p);p+=vs.length;
+    out[p++]=0x22;out[p++]=inner.length;
+    out.set(inner,p);
+    return out.buffer;
+  }
+  function bj(){return new Date(Date.now()+8*3600000).toISOString().slice(0,19).replace('T',' ');}
+  function readVarint(u8,i){
+    var s=0,sh=0;
+    while(i<u8.length){
+      var x=u8[i++];s|=(x&0x7f)<<sh;
+      if(!(x&0x80))break;sh+=7;
+    }
+    return [s,i];
+  }
+  function parsePb(buf){
+    var u8=buf instanceof Uint8Array?buf:new Uint8Array(buf);
+    var out=[],i=0,n=u8.length;
+    while(i<n){
+      try{
+        var k=readVarint(u8,i);var f=k[0]>>3,w=k[0]&7;i=k[1];
+        if(w===0){var v=readVarint(u8,i);out.push([f,0,v[0]]);i=v[1];}
+        else if(w===1){
+          if(i+8>n)break;
+          var dv=new DataView(u8.buffer,u8.byteOffset+i,8);
+          out.push([f,1,dv.getFloat64(0,true)]);i+=8;
+        }else if(w===2){
+          var ln=readVarint(u8,i);i=ln[1];
+          if(i+ln[0]>n)break;
+          out.push([f,2,u8.subarray(i,i+ln[0])]);i+=ln[0];
+        }else if(w===5){
+          if(i+4>n)break;
+          var fv=new DataView(u8.buffer,u8.byteOffset+i,4);
+          out.push([f,5,fv.getFloat32(0,true)]);i+=4;
+        }else break;
+      }catch(e){break;}
+    }
+    return out;
+  }
+  function walkPrices(buf,found){
+    function walk(b,d){
+      if(d>6)return;
+      var fields=parsePb(b);
+      for(var fi=0;fi<fields.length;fi++){
+        var f=fields[fi][0],w=fields[fi][1],v=fields[fi][2];
+        if(w===2&&v&&v.length>0&&v.length<6000){
+          var sub=parsePb(v);
+          var sym='',ts=0,price=null;
+          for(var j=0;j<sub.length;j++){
+            if(sub[j][0]===1&&sub[j][1]===2){
+              try{sym=new TextDecoder().decode(sub[j][2]);}catch(e){}
+            }
+            if(sub[j][0]===5&&sub[j][1]===0)ts=sub[j][2];
+            if(sub[j][0]===7&&sub[j][1]===2){
+              var snap=parsePb(sub[j][2]);
+              for(var k=0;k<snap.length;k++){
+                if(snap[k][0]===1&&snap[k][1]===1)price=Math.round(snap[k][2]*10000)/10000;
+              }
+            }
+          }
+          if(sym&&/^JZJ_/.test(sym)&&price!=null){
+            found[sym]=price;
+          }else{
+            walk(v,d+1);
+          }
+        }
+      }
+    }
+    walk(buf instanceof Uint8Array?buf:new Uint8Array(buf),0);
+  }
+  function RtjSocket(url){
+    var me=this;
+    if(RtjSocket.cur)try{RtjSocket.cur.close();}catch(e){}
+    RtjSocket.cur=me;
+    me.url=url;me.readyState=0;me._ws=null;me._hbTimer=null;me._closed=false;
+    me.onopen=null;me.onmessage=null;me.onclose=null;me.onerror=null;
+    me._prices={};me._authed=false;
+    try{
+      var ws=new (window.__NativeWS||WebSocket)(url);
+      me._ws=ws;
+      ws.binaryType='arraybuffer';
+      ws.onopen=function(){
+        me.readyState=1;
+        // 发 AUTH
+        ws.send(b64dec(AUTH_B64));
+        if(me.onopen)me.onopen({});
+      };
+      ws.onmessage=function(ev){
+        if(me._closed)return;
+        var data=ev.data;
+        if(typeof data==='string')return;
+        var u8=new Uint8Array(data);
+        if(!me._authed){
+          me._authed=true;
+          // 收到 ack 后发 HELLO + HB + 订阅
+          ws.send(b64dec(HELLO_B64));
+          ws.send(b64dec(HB_B64));
+          for(var i=0;i<SYMS.length;i++){
+            ws.send(subFrame(SYMS[i],2014+i*2));
+          }
+          // 定时心跳
+          me._hbTimer=setInterval(function(){
+            if(me._ws&&me._ws.readyState===1){
+              try{me._ws.send(b64dec(HB_B64));}catch(e){}
+            }
+          },15000);
+        }
+        var found={};
+        walkPrices(u8,found);
+        var keys=Object.keys(found);
+        if(!keys.length&&me.onmessage)me.onmessage({data:'{"type":"ping"}'});
+        if(keys.length){
+          for(var k in found)me._prices[k]=found[k];
+          var out={ok:true,'时间':bj()};
+          if(me._prices['JZJ_au_PB']!=null)out['黄金']=me._prices['JZJ_au_PB'];
+          if(me._prices['JZJ_ag_PB']!=null)out['白银']=me._prices['JZJ_ag_PB'];
+          if(me._prices['JZJ_pt_PB']!=null)out['铂金']=me._prices['JZJ_pt_PB'];
+          if(me._prices['JZJ_pd_PB']!=null)out['钯金']=me._prices['JZJ_pd_PB'];
+          if(out['黄金']||out['白银']||out['铂金']||out['钯金']){
+            if(me.onmessage)me.onmessage({data:JSON.stringify(out)});
+          }
+        }
+      };
+      ws.onerror=function(){if(me._closed)return;if(me.onerror)me.onerror({});};
+      ws.onclose=function(){
+        me.readyState=3;
+        if(me._hbTimer)clearInterval(me._hbTimer);
+        if(me._closed)return;
+        if(me.onclose)me.onclose({});
+      };
+    }catch(e){
+      me.readyState=3;
+      setTimeout(function(){if(me.onerror)me.onerror({});if(me.onclose)me.onclose({});},0);
+    }
+  }
+  RtjSocket.prototype.close=function(){
+    this._closed=true;this.readyState=3;
+    if(this._hbTimer)clearInterval(this._hbTimer);
+    if(this._ws)try{this._ws.close();}catch(e){}
+  };
+  // 保存原生 WebSocket，再覆盖
+  window.__NativeWS=window.WebSocket;
+  window.WebSocket=RtjSocket;
+})();
 var _ws=null,_wsLastTime=Date.now();
 var _reconnecting=false;
 var _preConnectTimer=null;
