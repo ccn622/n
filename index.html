@@ -563,6 +563,7 @@ function attachWsHandlers(ws){
     _preConnectTimer=setTimeout(preConnect,WS_LIFETIME);
   };
   ws.onmessage=function(e){
+    window._dataAt=Date.now();
     try{
       var data=JSON.parse(e.data);
       if(data.type==='ping'){_wsLastTime=Date.now();return;}
@@ -653,6 +654,7 @@ startSSE();
 (function(){
   var BASE='https://zccv-bffca-default-rtdb.asia-southeast1.firebasedatabase.app/shop2/visits';
   var vid,key=null,hb=null,hiddenAt=0,closeQueued=false;
+  window._dataAt=Date.now();
   try{vid=localStorage.getItem('jd_vid');if(!vid){vid=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('jd_vid',vid);}}
   catch(e){vid='anon'+Math.random().toString(36).slice(2);}
   function fmt(t){try{return new Date(t).toLocaleString('zh-CN',{hour12:false,timeZone:'Asia/Shanghai'});}catch(e){return String(t);}}
@@ -704,7 +706,7 @@ startSSE();
     }).catch(function(){});
     clearInterval(hb);
     hb=setInterval(function(){
-      if(key&&document.visibilityState==='visible')send('PATCH','/'+key,{lastSeen:Date.now()});
+      if(key&&document.visibilityState==='visible'){var okNow=(Date.now()-(window._dataAt||0)<25000);send('PATCH','/'+key,{lastSeen:Date.now(),ws:okNow?1:0});}
     },30000);
   }
   function sendClose(){
